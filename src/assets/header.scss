@@ -1,0 +1,35 @@
+.header-container {
+  width: 100%;
+  padding: 25px 30px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: white;
+}
+
+.header-wrapper {
+  width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-logo {
+  font-size: 30px;
+  line-height: 30px;
+}
+
+.header-menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-list {
+  font-size: 20px;
+  line-height: 20px;
+  list-style: none;
+  padding: 0px 0px 0px 8px;
+}
