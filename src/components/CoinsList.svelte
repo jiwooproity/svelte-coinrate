@@ -55,7 +55,7 @@
 
     const onLoadPaprika = async() => {
         const coinPageArr: number[] = getWritablePage();
-        const { data }: CoinsResponseIF = await API.getAllCoin();
+        const { data }: CoinsResponseIF<CoinIF[]> = await API.getAllCoin();
         const inData: CoinIF[] = await Promise.all(data.slice(...coinPageArr).map<Promise<CoinIF>>(getSymbolImage));
         coinList = coinList.concat(inData);
         loading = true;

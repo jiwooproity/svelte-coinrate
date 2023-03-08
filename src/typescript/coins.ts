@@ -8,8 +8,8 @@ export interface CoinIF {
   type: string;
 }
 
-export interface CoinsResponseIF {
-  data: CoinIF[];
+export interface CoinsResponseIF<Type> {
+  data: Type;
   status: number;
 }
 
