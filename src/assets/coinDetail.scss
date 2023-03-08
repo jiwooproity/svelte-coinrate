@@ -1,0 +1,14 @@
+.coin-detail-list-container {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+
+  padding: 0px 30px 35px 30px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.coin-detail-list-wrapper {
+  width: 1200px;
+  height: 100%;
+}
