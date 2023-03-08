@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { link } from "svelte-spa-router";
+	import { Link } from "svelte-navigator";
 
     interface MenuIF {
         label: string;
@@ -12,12 +12,12 @@
 <div class="header-container">
     <div class="header-wrapper">
         <h1 class="header-logo">
-            <a href="/" use:link>COINRATE</a>
+            <Link to="/">COINRATE</Link>
         </h1>
         <ul class="header-menu">
             {#each menu as list}
                 <li class="header-list">
-                    <a href={list.path} use:link>{list.label}</a>
+                    <Link to={list.path}>{list.label}</Link>
                 </li>
             {/each}
         </ul>
