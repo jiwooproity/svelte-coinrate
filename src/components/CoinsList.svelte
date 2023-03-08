@@ -1,7 +1,7 @@
 <script lang="ts">
     import _ from "lodash";
     import { onDestroy, onMount } from "svelte";
-    import { link } from "svelte-spa-router";
+	import { Link } from "svelte-navigator";
     import { dndzone, type DndEvent } from "svelte-dnd-action"
     import { flip } from "svelte/animate";
     
@@ -119,7 +119,7 @@
         {#if loading}
             {#each coinList as coin(coin.id)}
             <div class="coin-info-box" animate:flip={{duration:flipDurationMs}}>
-                <a href={`/rate/${coin.id}`} use:link>
+                <Link to={`/${coin.id}`}>
                     <div class="coin-info">
                         <div class="coin-symbol-image-wrapper">
                             <!-- svelte-ignore a11y-missing-attribute -->
@@ -134,7 +134,7 @@
                             </span>
                         </div>
                     </div>
-                </a>
+                </Link>
             </div>
         {/each}
         {:else}

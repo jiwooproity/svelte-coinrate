@@ -1,16 +1,14 @@
 <script lang="ts">
-	import Router from "svelte-spa-router";
+	import { Router, Route } from "svelte-navigator";
 
 	import { Header } from "./common";
 	import { CoinsList, CoinDetail } from "./components";
-
-	const routes = {
-		'/': CoinsList,
-		'/rate/:id': CoinDetail,
-	}
 </script>
 
 <main>
-	<Header />
-	<Router {routes}/>
+	<Router>
+		<Header />
+		<Route path="/" component={CoinsList} />
+		<Route path="/:id" component={CoinDetail}/>
+	</Router>
 </main>

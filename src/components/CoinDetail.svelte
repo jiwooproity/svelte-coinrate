@@ -1,12 +1,13 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { useParams } from "svelte-navigator";
 
     import API from "../apis/api";
     import { Loading } from "../common";
     import type { CoinsDetail, CoinsResponseIF } from "../typescript/coins";
 
     interface routeIF { id: string };
-    export let params: routeIF;
+    const params = useParams();
 
     let coinDetail: CoinsDetail;
     let loading: boolean = false;
@@ -18,7 +19,7 @@
     }
 
     onMount(() => {
-        onLoadPaprika(<{id: string}>{id: params.id});
+        onLoadPaprika({ id: $params.id });
     })
 </script>
 
