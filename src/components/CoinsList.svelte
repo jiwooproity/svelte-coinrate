@@ -8,13 +8,15 @@
     import API from "../apis/api";
     import { Loading } from "../common";
     import type { CoinIF, CoinsResponseIF } from "../typescript";
-    import { coinPageWritable, coinsWritable } from "../writeable/coinsWritable";
+    import { lastScrollTop, coinPageWritable, coinsWritable } from "../writeable/coinsWritable";
 
     interface ScrollDataIF {
         scrollTop: number;
         scrollHeight: number;
         clientHeight: number;
     };
+    
+    type StoreIF = [CoinIF[], number[], number];
 
     let coinPage: number[] = [0, 100];
     let coinList: CoinIF[] = []
@@ -55,7 +57,7 @@
     // };
 
     const onLoadPaprika = async() => {
-        const [coinsStore, coinPageStore]: [CoinIF[], number[]] = onLoadStore();
+        const [coinsStore, coinPageStore, ]: StoreIF = onLoadStore();
         const { data }: CoinsResponseIF<CoinIF[]> = await API.getAllCoin();
         const inData: CoinIF[] = data.slice(...coinPageStore).map<CoinIF>(getSymbolImage);
         
@@ -64,22 +66,28 @@
         loading = true;
     };
 
-    const onLoadStore = (): [CoinIF[], number[]] => {
+    const onLoadStore = (): StoreIF => {
+        let scrollTopStore: number = 0;
         let coinsStore: CoinIF[] = [];
         let coinPageStore: number[] = [0, 100];
+        lastScrollTop.subscribe((scrollTop) => scrollTopStore = scrollTop);
         coinsWritable.subscribe((coins) => coinsStore = coins);
         coinPageWritable.subscribe((coinPage) => coinPageStore = coinPage);
-        return [coinsStore, coinPageStore];
+        return [coinsStore, coinPageStore, scrollTopStore];
     }
   
     onMount(() => {
-        const [coinsStore, coinPageStore] = onLoadStore();
+        const [coinsStore, , scrollTopStore] = onLoadStore();
 
         if(_.isEmpty(coinsStore)) {
             onLoadPaprika();
         } else {
             coinList = coinsStore;
             loading = true;
+            
+            setTimeout(() => {
+                window.scrollTo({ top: scrollTopStore, behavior: "smooth" });
+            }, 1);
         }
     });
 
@@ -96,7 +104,7 @@
     };
 
     const onHandleScroll = (/* e: Event */) => {
-        const [coinsStore, coinPageStore]: [CoinIF[], number[]] = onLoadStore();
+        const [, coinPageStore, ]: StoreIF = onLoadStore();
         const { scrollTop, scrollHeight, clientHeight }: ScrollDataIF = document.documentElement;
         
         if(scrollHeight === scrollTop + clientHeight) {
@@ -104,6 +112,8 @@
             coinPage = coinPageArr;
             coinPageWritable.update((): number[] => [coinPageStore[1], coinPageStore[1] + 100]);
         }
+
+        lastScrollTop.update((): number => scrollTop);
     };
 
     // Infinity Scroll addEventListener
