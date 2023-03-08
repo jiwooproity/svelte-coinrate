@@ -1,6 +1,6 @@
 <script lang="ts">
+    import _ from "lodash";
     import { onDestroy, onMount } from "svelte";
-    import { writable, type Writable } from "svelte/store";
     import { link } from "svelte-spa-router";
     import { dndzone, type DndEvent } from "svelte-dnd-action"
     import { flip } from "svelte/animate";
@@ -8,6 +8,7 @@
     import API from "../apis/api";
     import { Loading } from "../common";
     import type { CoinIF, CoinsResponseIF } from "../typescript";
+    import { coinPageWritable, coinsWritable } from "../writeable/coinsWritable";
 
     interface ScrollDataIF {
         scrollTop: number;
@@ -15,7 +16,7 @@
         clientHeight: number;
     };
 
-    let coinPage: Writable<number[]> = writable<number[]>([0, 100]);
+    let coinPage: number[] = [0, 100];
     let coinList: CoinIF[] = []
     let loading: boolean = false;
 
@@ -23,7 +24,7 @@
     let flipDurationMs: number = 200;
     let dropTargetStyle: Record<string, string> = { outline: "none" };
 
-    const getSymbolImage = async(value: CoinIF): Promise<CoinIF> => {
+    const getSymbolImage = (value: CoinIF): CoinIF => {
         const symbolIcon: string = `https://coinicons-api.vercel.app/api/icon/${value.symbol.toLowerCase()}`;
         // let img = new Image();
         // const base64Encode = new Promise((resolve) => {
@@ -47,41 +48,61 @@
         }
     };
 
-    const getWritablePage = (): number[] => {
-        let coinPageArr: number[] = [];
-        coinPage.subscribe((page: number[]) => coinPageArr = [page[0], page[1]]);
-        return coinPageArr;
-    };
+    // const getWritablePage = (): number[] => {
+    //     let coinPageArr: number[] = [];
+    //     coinPage.subscribe((page: number[]) => coinPageArr = [page[0], page[1]]);
+    //     return coinPageArr;
+    // };
 
     const onLoadPaprika = async() => {
-        const coinPageArr: number[] = getWritablePage();
+        const [coinsStore, coinPageStore]: [CoinIF[], number[]] = onLoadStore();
         const { data }: CoinsResponseIF<CoinIF[]> = await API.getAllCoin();
-        const inData: CoinIF[] = await Promise.all(data.slice(...coinPageArr).map<Promise<CoinIF>>(getSymbolImage));
-        coinList = coinList.concat(inData);
+        const inData: CoinIF[] = data.slice(...coinPageStore).map<CoinIF>(getSymbolImage);
+        
+        coinList = coinsStore.concat(inData);
+        coinsWritable.update(() => [...coinList]);
         loading = true;
     };
+
+    const onLoadStore = (): [CoinIF[], number[]] => {
+        let coinsStore: CoinIF[] = [];
+        let coinPageStore: number[] = [0, 100];
+        coinsWritable.subscribe((coins) => coinsStore = coins);
+        coinPageWritable.subscribe((coinPage) => coinPageStore = coinPage);
+        return [coinsStore, coinPageStore];
+    }
   
     onMount(() => {
-        onLoadPaprika();
+        const [coinsStore, coinPageStore] = onLoadStore();
+
+        if(_.isEmpty(coinsStore)) {
+            onLoadPaprika();
+        } else {
+            coinList = coinsStore;
+            loading = true;
+        }
     });
 
-    coinPage.subscribe((page: number[]) => {
-        if(page[0] !== 0 && page[1] !== 52) {
+    coinPageWritable.subscribe((/* page: number[] */) => {
+        if(coinPage[0] !== 0 && coinPage[1] !== 100) {
             onLoadPaprika();
         }
     });
 
     const onHandleSort = (e: CustomEvent<DndEvent<CoinIF>>) => {
         const array: CoinIF[] = [...e.detail.items];
-        coinList = array;
+        coinList = [...array];
+        coinsWritable.update(() => [...array]);
     };
 
-    const onHandleScroll = (e: Event) => {
+    const onHandleScroll = (/* e: Event */) => {
+        const [coinsStore, coinPageStore]: [CoinIF[], number[]] = onLoadStore();
         const { scrollTop, scrollHeight, clientHeight }: ScrollDataIF = document.documentElement;
         
         if(scrollHeight === scrollTop + clientHeight) {
-            const coinPageArr: number[] = getWritablePage();
-            coinPage.update((): number[] => [coinPageArr[1], coinPageArr[1] + 100]);
+            const coinPageArr: number[] = [coinPageStore[1], coinPageStore[1] + 100];
+            coinPage = coinPageArr;
+            coinPageWritable.update((): number[] => [coinPageStore[1], coinPageStore[1] + 100]);
         }
     };
 
