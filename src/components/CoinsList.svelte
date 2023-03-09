@@ -1,6 +1,6 @@
 <script lang="ts">
     import _ from "lodash";
-    import { onDestroy, onMount } from "svelte";
+    import { afterUpdate, onDestroy, onMount } from "svelte";
 	import { Link } from "svelte-navigator";
     import { dndzone, type DndEvent } from "svelte-dnd-action"
     import { flip } from "svelte/animate";
@@ -84,10 +84,6 @@
         } else {
             coinList = coinsStore;
             loading = true;
-            
-            setTimeout(() => {
-                window.scrollTo({ top: scrollTopStore, behavior: "smooth" });
-            }, 1);
         }
     });
 
@@ -120,6 +116,14 @@
     onDestroy(() => {
         document.removeEventListener("scroll", onHandleScroll);
     });
+
+    afterUpdate(() => {
+        const [, , scrollTopStore] = onLoadStore();
+        
+        setTimeout(() => {
+            window.scrollTo({ top: scrollTopStore, behavior: "smooth" });
+        }, 1)
+    })
 
     document.addEventListener("scroll", onHandleScroll);
 </script>
